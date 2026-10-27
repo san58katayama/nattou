@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>極・3D納豆まぜまぜ職人 〜至高の一杯をご飯にのせて〜</title>
+  <meta name="description" content="本物の3Dで納豆をぐるぐる混ぜる！無限タレ・からし・ネギとダイナミックな立体形状変化！">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800;900&family=Yuji+Boku&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="three.min.js"></script>
+</head>
+<body>
+  <div id="game-app">
+    <!-- 背景デコレーション -->
+    <div class="bg-pattern"></div>
+    <div class="ambient-glow"></div>
+
+    <!-- ヘッダー (プレイ中は自動非表示) -->
+    <header id="game-header" class="game-header">
+      <div class="title-wrap">
+        <span class="badge">極上3Dシミュレーター</span>
+        <h1 class="main-title">極・3D納豆まぜまぜ職人</h1>
+      </div>
+      <div class="header-controls">
+        <button id="sound-toggle-btn" class="icon-btn" title="サウンド切替">🔊 音: ON</button>
+        <button id="collection-open-btn" class="icon-btn" title="納豆図鑑">📖 3D納豆図鑑 (<span id="unlocked-count">0</span>/<span id="total-count">26</span>)</button>
+      </div>
+    </header>
+
+    <!-- STEP 1: 器具選択画面 (全器具リアルタイム3Dビューで魅せる！) -->
+    <section id="screen-select-tool" class="screen active">
+      <div class="glass-card tool-select-container">
+        <div class="card-header">
+          <h2 class="sub-title">まぜる器具を選んでください</h2>
+          <p class="guide-text">器具ごとに回転効率、泡立ちやすさ、豆のすり潰し方がリアルに変わります！</p>
+        </div>
+
+        <div class="tools-grid">
+          <!-- 箸 -->
+          <div class="tool-card selected" data-tool="chopsticks">
+            <div class="tool-canvas-box" id="thumb-chopsticks"></div>
+            <div class="tool-info">
+              <h3 class="tool-name">伝統の割り箸</h3>
+              <span class="tool-tag balance">万能・バランス型</span>
+              <p class="tool-desc">適度なしなりと繊細なコントロール。王道のふんわり泡立ちを生み出す職人の友。</p>
+              <div class="tool-stats">
+                <div class="stat-row"><span>回転効率</span><div class="bar"><div style="width: 60%"></div></div></div>
+                <div class="stat-row"><span>泡立ち度</span><div class="bar"><div style="width: 65%"></div></div></div>
+                <div class="stat-row"><span>つぶし度</span><div class="bar"><div style="width: 20%"></div></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 電動泡だて器 -->
+          <div class="tool-card" data-tool="whisk">
+            <div class="tool-canvas-box" id="thumb-whisk"></div>
+            <div class="tool-info">
+              <h3 class="tool-name">超電導の電動泡だて器</h3>
+              <span class="tool-tag speed">自動・ハイパワー型</span>
+              <p class="tool-desc">スイッチ1つで超高速モーターが回転！手動の限界を超えたトルクで一瞬でホイップ化する現代の魔兵器。</p>
+              <div class="tool-stats">
+                <div class="stat-row"><span>回転効率</span><div class="bar"><div style="width: 100%"></div></div></div>
+                <div class="stat-row"><span>泡立ち度</span><div class="bar"><div style="width: 100%"></div></div></div>
+                <div class="stat-row"><span>つぶし度</span><div class="bar"><div style="width: 15%"></div></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- お玉 -->
+          <div class="tool-card" data-tool="ladle">
+            <div class="tool-canvas-box" id="thumb-ladle"></div>
+            <div class="tool-info">
+              <h3 class="tool-name">重量級のお玉</h3>
+              <span class="tool-tag heavy">大味・豪快型</span>
+              <p class="tool-desc">重たくて回しづらいが、広範囲を一気に攪拌。端っこに納豆が溜まりやすいクセモノ。</p>
+              <div class="tool-stats">
+                <div class="stat-row"><span>回転効率</span><div class="bar"><div style="width: 45%"></div></div></div>
+                <div class="stat-row"><span>泡立ち度</span><div class="bar"><div style="width: 40%"></div></div></div>
+                <div class="stat-row"><span>つぶし度</span><div class="bar"><div style="width: 70%"></div></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ごますり棒 -->
+          <div class="tool-card" data-tool="pestle">
+            <div class="tool-canvas-box" id="thumb-pestle"></div>
+            <div class="tool-info">
+              <h3 class="tool-name">粉砕のごますり棒</h3>
+              <span class="tool-tag crush">圧殺・ペースト型</span>
+              <p class="tool-desc">豆を容赦なくすり潰して超濃密なペーストへ！未知なる新食感納豆が爆誕する。</p>
+              <div class="tool-stats">
+                <div class="stat-row"><span>回転効率</span><div class="bar"><div style="width: 50%"></div></div></div>
+                <div class="stat-row"><span>泡立ち度</span><div class="bar"><div style="width: 30%"></div></div></div>
+                <div class="stat-row"><span>つぶし度</span><div class="bar"><div style="width: 100%"></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-footer">
+          <button id="start-mix-btn" class="primary-btn pulse">
+            <span>この器具で納豆を混ぜる！</span>
+            <span class="btn-arrow">➔</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2: 3D混ぜる画面 (台風・雷電エフェクト搭載) -->
+    <section id="screen-mix" class="screen">
+      <div class="mix-layout-3d">
+        
+        <!-- 上部コントロール＆薬味HUDバー (すべて上に集約) -->
+        <div class="top-hud-bar glass-panel">
+          <div class="hud-left">
+            <span class="hud-tool-tag" id="current-tool-display">🥢 伝統の割り箸</span>
+            <div class="hud-count-wrap">
+              <span class="hud-count-label">混ぜ:</span>
+              <strong id="mix-count">0</strong>
+              <span class="hud-unit">回</span>
+            </div>
+          </div>
+
+          <!-- 上部：薬味・調味料投入ボタン (タレ・からし・ネギ) -->
+          <div class="hud-condiments-bar">
+            <!-- たれ -->
+            <button id="add-sauce-btn" class="hud-condiment-btn sauce" title="秘伝のタレを投入">
+              <span class="btn-emoji">🧴</span>
+              <span class="btn-text">タレ</span>
+              <span class="btn-badge" id="sauce-count">0</span>
+            </button>
+
+            <!-- からし -->
+            <button id="add-mustard-btn" class="hud-condiment-btn mustard" title="和がらしを投入">
+              <span class="btn-emoji">🟡</span>
+              <span class="btn-text">からし</span>
+              <span class="btn-badge" id="mustard-count">0</span>
+            </button>
+
+            <!-- ネギ -->
+            <button id="add-green-onion-btn" class="hud-condiment-btn onion" title="刻み青ネギを投入">
+              <span class="btn-emoji">🥬</span>
+              <span class="btn-text">ネギ</span>
+              <span class="btn-badge" id="onion-count">0</span>
+            </button>
+          </div>
+
+          <!-- 右：ご飯に乗せるボタン -->
+          <div class="hud-right">
+            <button id="serve-rice-btn" class="serve-action-btn-compact">
+              <span class="serve-icon">🍚</span>
+              <span class="serve-title">ご飯に乗せる！</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- メイン 3D ビューポート (邪魔な文字・トーストUI一切排除！) -->
+        <div id="three-viewport" class="three-viewport-container">
+          <!-- 3Dキャンバスが挿入されます -->
+
+          <!-- 混ぜスパーク演出エフェクト -->
+          <div id="mix-sparkles" class="mix-sparkles-layer"></div>
+
+          <!-- 炎エフェクトオーバーレイ (光と熱波のみ・文字なし) -->
+          <div id="flame-overlay" class="flame-overlay">
+            <div class="flame-vignette"></div>
+          </div>
+
+          <!-- 炎鎮火スモーク (炎が消える瞬間の白い蒸気・煙) -->
+          <div id="smoke-overlay" class="smoke-overlay"></div>
+
+          <!-- 稲妻放電フラッシュ -->
+          <div id="lightning-overlay" class="lightning-flash-overlay"></div>
+
+          <!-- 黄金覚醒ゴッドレイ -->
+          <div id="gold-overlay" class="gold-overlay"></div>
+
+          <!-- 硬化エフェクトオーバーレイ (光と衝撃のみ・文字なし) -->
+          <div id="rock-overlay" class="rock-overlay"></div>
+
+          <!-- 台風・竜巻オーバーレイレイヤー (風と稲妻のみ・文字なし) -->
+          <div id="typhoon-overlay" class="typhoon-overlay">
+            <div class="typhoon-wind"></div>
+            <div class="typhoon-lightning"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- STEP 3: 3Dご飯に乗せる演出 〜 リザルト画面 -->
+    <section id="screen-result" class="screen">
+      <div class="result-container glass-card">
+        
+        <!-- 3Dご飯茶碗ビューポート -->
+        <div class="pour-scene-3d">
+          <div id="result-three-viewport" class="result-three-viewport"></div>
+          
+          <div class="congrats-banner">
+            <span class="eval-tag" id="res-eval-tag">至高の一杯</span>
+            <h2 id="res-natto-name" class="result-title">黄金のふんわり納豆ご飯</h2>
+          </div>
+        </div>
+
+        <!-- リザルト詳細 -->
+        <div class="result-details-grid">
+          
+          <div class="score-card main-score">
+            <span class="score-label">総合納豆職人度</span>
+            <div class="rank-display">
+              <span id="res-rank" class="rank-letter rank-s">S</span>
+              <div class="points-wrap">
+                <span id="res-points">9,240</span>
+                <span class="pt-unit">Pt</span>
+              </div>
+            </div>
+            <p id="res-review-comment" class="review-text">「完璧な空気の含み具合と糸引き！これぞ日本の伝統美！」</p>
+          </div>
+
+          <div class="score-card breakdown-card">
+            <h4>📊 調理データ詳細</h4>
+            <ul class="stats-list">
+              <li><span>使用した器具:</span> <strong id="res-used-tool">割り箸</strong></li>
+              <li><span>まぜた回数:</span> <strong id="res-mix-count">128回</strong></li>
+              <li><span>タレ投入量:</span> <strong id="res-sauce-stat">3プッシュ</strong></li>
+              <li><span>からし投入量:</span> <strong id="res-mustard-stat">1絞り</strong></li>
+              <li><span>ネギ投入量:</span> <strong id="res-onion-stat">5つまみ</strong></li>
+            </ul>
+          </div>
+
+          <div class="score-card form-info-card">
+            <h4>📜 解放された納豆の形態</h4>
+            <div class="unlocked-badge">
+              <span id="res-form-badge" class="badge-icon">✨</span>
+              <div>
+                <strong id="res-form-title">おいしい納豆</strong>
+                <p id="res-form-flavor" class="flavor-txt">糸が白く泡立ち、旨味成分が最高潮に達した状態。</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- リザルト操作ボタン -->
+        <div class="result-actions">
+          <button id="restart-btn" class="primary-btn restart-btn">
+            <span>🥢 別の器具で新しく混ぜる</span>
+          </button>
+          <button id="view-collection-result-btn" class="secondary-btn">
+            <span>📖 3D納豆図鑑を見る</span>
+          </button>
+          <button id="share-btn" class="secondary-btn share-btn">
+            <span>📢 結果をコピー</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- モーダル：3D納豆ご飯図鑑 (全24種・リアル3D納豆ご飯ビュー付き！) -->
+    <div id="collection-modal" class="modal-backdrop">
+      <div class="modal-dialog glass-card">
+        <div class="modal-header">
+          <h3>📖 全日本3D至高の納豆ご飯大図鑑 (<span id="modal-unlocked-count">0</span>/<span id="modal-total-count">26</span>)</h3>
+          <button id="modal-close-btn" class="modal-close">&times;</button>
+        </div>
+        <p class="modal-sub">炊きたてアツアツの白ご飯に豪快に盛り付けた、至高の納豆ご飯全26種の立体3D図鑑です！各カードに解放のヒントが記載されています。</p>
+        
+        <div id="collection-grid" class="collection-grid">
+          <!-- JSで各形態の個性的な3Dモデルカードを動的生成 -->
+        </div>
+
+        <div class="modal-footer">
+          <button id="modal-confirm-btn" class="primary-btn sm">閉じる</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- トースト通知 -->
+    <div id="toast" class="toast"></div>
+
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
