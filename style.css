@@ -552,20 +552,7 @@ body.in-mix-mode #game-app {
 }
 
 .typhoon-lightning {
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0);
-  pointer-events: none;
-}
-
-.typhoon-overlay.active .typhoon-lightning {
-  animation: lightningFlash 2.5s infinite;
-}
-
-@keyframes lightningFlash {
-  0%, 88%, 92%, 100% { background: rgba(255, 255, 255, 0); }
-  89%, 91% { background: rgba(255, 255, 255, 0.35); }
-  90% { background: rgba(255, 240, 180, 0.6); }
+  display: none !important;
 }
 
 .screen-shake {
@@ -671,27 +658,9 @@ body.in-mix-mode #game-app {
   100% { opacity: 1.0; transform: scale(1.02); }
 }
 
-/* 硬化エフェクトオーバーレイ (光と衝撃のみ・文字なし) */
+/* 硬化エフェクトオーバーレイ (画面点滅防止のため無効化) */
 .rock-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;
-  z-index: 8;
-  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.75) 0%, rgba(147, 197, 253, 0.35) 50%, transparent 80%);
-  transition: opacity 0.15s ease;
-}
-
-.rock-overlay.flash {
-  opacity: 1;
-  animation: rockFlash 0.35s ease-out forwards;
-}
-
-@keyframes rockFlash {
-  0% { opacity: 1; transform: scale(0.9); }
-  100% { opacity: 0; transform: scale(1.2); }
-}
-  transform: scale(0.96);
+  display: none !important;
 }
 
 .condiment-infinite-btn .btn-top {
@@ -1182,15 +1151,22 @@ body.in-mix-mode #game-app {
   }
 
   #game-app {
-    padding: 8px 8px env(safe-area-inset-bottom, 8px) 8px;
+    padding: 8px 8px calc(env(safe-area-inset-bottom, 20px) + 85px) 8px;
     min-height: 100dvh;
   }
 
   /* ヘッダー */
   .game-header {
-    padding: 8px 12px;
+    padding: 8px 10px;
     margin-bottom: 8px;
     border-radius: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .header-controls {
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
   .title-wrap .badge {
@@ -1199,11 +1175,11 @@ body.in-mix-mode #game-app {
   }
 
   .main-title {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
   }
 
   .icon-btn {
-    padding: 6px 8px;
+    padding: 5px 8px;
     font-size: 0.72rem;
   }
 
@@ -1282,9 +1258,14 @@ body.in-mix-mode #game-app {
     height: 5px;
   }
 
+  .action-footer {
+    padding: 16px 0 35px 0;
+    margin-top: 10px;
+  }
+
   .primary-btn {
     width: 100%;
-    padding: 12px 20px;
+    padding: 14px 20px;
     font-size: 1.05rem;
     justify-content: center;
   }
@@ -1564,27 +1545,9 @@ body.in-mix-mode #game-app {
   100% { opacity: 0; transform: translateY(-70px) scale(1.4); }
 }
 
-/* 稲妻放電スパーク (サンダーボルト) */
+/* 稲妻放電スパーク (画面点滅防止のため無効化) */
 .lightning-flash-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 10;
-  opacity: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(186, 230, 253, 0.8) 0%, rgba(56, 189, 248, 0.4) 50%, transparent 80%);
-  mix-blend-mode: screen;
-}
-
-.lightning-flash-overlay.flash {
-  animation: lightningStrobe 0.28s ease-out forwards;
-}
-
-@keyframes lightningStrobe {
-  0% { opacity: 0.9; }
-  25% { opacity: 0.15; }
-  50% { opacity: 1.0; }
-  75% { opacity: 0.3; }
-  100% { opacity: 0; }
+  display: none !important;
 }
 
 /* 黄金覚醒ゴッドレイ光線 */

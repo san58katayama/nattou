@@ -315,7 +315,81 @@
     }
 
     playClick() {
-      // 押したときのSEは消去
+      if (!this.enabled || !this.ctx) return;
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(520, t);
+      osc.frequency.exponentialRampToValueAtTime(780, t + 0.04);
+      gain.gain.setValueAtTime(0.12, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.05);
+    }
+
+    // 器具選択時の個性豊かな専用SE
+    playToolSelect(toolKey) {
+      if (!this.enabled || !this.ctx) return;
+      const t = this.ctx.currentTime;
+
+      if (toolKey === 'chopsticks') {
+        // 🥢 割り箸: 「カチッ」と乾いた木の心地よい音
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1100, t);
+        osc.frequency.exponentialRampToValueAtTime(350, t + 0.06);
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.07);
+      } else if (toolKey === 'whisk') {
+        // ⚡ 電動泡だて器: 「キュイーン！」と超高速モーターの起動音
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(320, t);
+        osc.frequency.exponentialRampToValueAtTime(1250, t + 0.12);
+        gain.gain.setValueAtTime(0.16, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.15);
+      } else if (toolKey === 'ladle') {
+        // 🥣 お玉: 「コトッ」と重厚感のある金属・陶器の音
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(380, t);
+        osc.frequency.exponentialRampToValueAtTime(140, t + 0.1);
+        gain.gain.setValueAtTime(0.28, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.12);
+      } else if (toolKey === 'pestle') {
+        // 🪵 すり棒: 「ズシッ」と力強い粉砕・木打音
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(260, t);
+        osc.frequency.exponentialRampToValueAtTime(80, t + 0.12);
+        gain.gain.setValueAtTime(0.32, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.14);
+      } else {
+        this.playClick();
+      }
     }
   }
 
@@ -633,13 +707,7 @@
   }
 
   function triggerLightningSpark() {
-    // 稲妻SE消去
-    const lightEl = document.getElementById('lightning-overlay');
-    if (lightEl) {
-      lightEl.classList.remove('flash');
-      void lightEl.offsetWidth;
-      lightEl.classList.add('flash');
-    }
+    // 画面点滅は無効化（眩しさを完全に防止）
   }
 
   function triggerGoldGodray() {
@@ -2596,6 +2664,7 @@
   const serveRiceBtn = document.getElementById('serve-rice-btn');
   const restartBtn = document.getElementById('restart-btn');
   const soundToggleBtn = document.getElementById('sound-toggle-btn');
+  const fullscreenToggleBtn = document.getElementById('fullscreen-toggle-btn');
   const collectionOpenBtn = document.getElementById('collection-open-btn');
   const viewCollectionResultBtn = document.getElementById('view-collection-result-btn');
   const modalCloseBtn = document.getElementById('modal-close-btn');
@@ -2603,14 +2672,54 @@
   const collectionModal = document.getElementById('collection-modal');
   const shareBtn = document.getElementById('share-btn');
 
-  toolCards.forEach(card => {
-    card.addEventListener('click', () => {
+  // 全画面モード切替
+  if (fullscreenToggleBtn) {
+    fullscreenToggleBtn.addEventListener('click', () => {
       sound.init();
       sound.playClick();
+      const doc = document;
+      const docEl = document.documentElement;
+      const isFull = doc.fullscreenElement || doc.webkitFullscreenElement;
+
+      if (!isFull) {
+        if (docEl.requestFullscreen) {
+          docEl.requestFullscreen().catch(() => {});
+        } else if (docEl.webkitRequestFullscreen) {
+          docEl.webkitRequestFullscreen();
+        }
+        fullscreenToggleBtn.textContent = '✖ 縮小';
+        showToast('全画面モードにしました');
+      } else {
+        if (doc.exitFullscreen) {
+          doc.exitFullscreen().catch(() => {});
+        } else if (doc.webkitExitFullscreen) {
+          doc.webkitExitFullscreen();
+        }
+        fullscreenToggleBtn.textContent = '📱 全画面';
+      }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+      const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      fullscreenToggleBtn.textContent = isFull ? '✖ 縮小' : '📱 全画面';
+    });
+  }
+
+  toolCards.forEach(card => {
+    const onSelect = () => {
+      sound.init();
       toolCards.forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
-      state.tool = card.getAttribute('data-tool');
-    });
+      const selectedTool = card.getAttribute('data-tool');
+      state.tool = selectedTool;
+      sound.playToolSelect(selectedTool);
+    };
+
+    card.addEventListener('pointerdown', () => {
+      sound.init();
+    }, { passive: true });
+
+    card.addEventListener('click', onSelect);
   });
 
   startMixBtn.addEventListener('click', () => {
